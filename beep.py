@@ -3,12 +3,13 @@ import wave
 import math
 
 SAMPLE_RATE = 44100
+BPM = 80
 
 
 class Signal:
 
     def __init__(self):
-        self.char = chr(0)
+        self.char = chr(127)
 
     def send(self, byte):
         self.char = byte
@@ -33,6 +34,7 @@ class Oscillator:
         self.freq = freq
         self.samples_per_cycle = SAMPLE_RATE / freq
         self.dt = 0
+        self.update_cycle = float(len(self.wavetable)) / float(self.samples_per_cycle)
 
     def set_savetable(self, wavetable):
         self.wavetable = wavetable
@@ -89,6 +91,37 @@ class Mixer:
         self.output.send(chr(total))
 
 
+class Sequencer:
+
+    def __init__(self, sequence=['r']):
+
+        self.osc = Oscillator(sequence[0])
+
+        self.output = Signal()
+        self.sequence = sequence
+        self.current_pos = 0
+
+        self.bps = (float(BPM) / 60.0)
+        self.update_frames = self.bps * SAMPLE_RATE
+        self.dt = 0
+
+    def generate_frame(self):
+        seq = self.sequence[self.current_pos % len(self.sequence)]
+
+        self.dt += 1
+        if self.dt > self.update_frames:
+            self.current_pos += 1
+            seq = self.sequence[self.current_pos % len(self.sequence)]
+            self.dt = 0
+            if seq != 'r':
+                self.osc.set_freq(seq)
+
+        self.osc.generate_frame()
+        if seq == 'r':
+            self.output.send(chr(127)) # rest, generate silence
+        else:
+            self.output.send(self.osc.output.poll())
+
 class WaveInterface:
 
     def __init__(self, path):
@@ -112,6 +145,10 @@ class WaveInterface:
     def generate_seconds(self, seconds):
         self.generate_frames(SAMPLE_RATE * seconds)
 
+    def generate_beats(self, beats):
+        n = int((float(BPM) / 60.0) * SAMPLE_RATE) * beats
+        self.generate_frames(n)
+
     def add_entity(self, entity):
         self.entities.append(entity)
 
@@ -120,18 +157,27 @@ if __name__ == "__main__":
 
     interface = WaveInterface("test.wav")
 
-    osc_c = Oscillator(261.625565)
-    interface.add_entity(osc_c)
+    #osc_c = Oscillator(261.625565)
+    #interface.add_entity(osc_c)
 
-    osc_e = Oscillator(329.63)
-    interface.add_entity(osc_e)
+    #osc_e = Oscillator(329.63)
+    #interface.add_entity(osc_e)
 
-    osc_g = Oscillator(392.00)
-    interface.add_entity(osc_g)
+    #osc_g = Oscillator(392.00)
+    #interface.add_entity(osc_g)
 
-    combi = Mixer(osc_c.output, osc_e.output, osc_g.output)
+    #combi = Mixer(osc_c.output, osc_e.output, osc_g.output)
+    #interface.add_entity(combi)
+
+    seq_a = Sequencer(sequence = [130.81, 164.81, 196.00])
+    interface.add_entity(seq_a)
+
+    seq_b = Sequencer(sequence = [392.00, 329.63, 261.63])
+    interface.add_entity(seq_b)
+
+    combi = Mixer(seq_a.output, seq_b.output)
     interface.add_entity(combi)
 
     interface.final_output = combi.output
 
-    interface.generate_seconds(3)
+    interface.generate_beats(7)
