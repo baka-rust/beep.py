@@ -76,3 +76,11 @@ b4,g4,e2
 g4,e4,c2
 g4,e4,c2
 ```
+
+# TODO
+* Fix bug where changing the sample rate causes oscillators to detune downwards (why)
+* Implement EnvelopeFilter
+* Implement Sampler
+* Have Samples automatically convert their sample rate to the overall sample rate
+* Limit the gain on the compressor to acceptable levels, or introduce hard-clipping for gains higher than 1
+* Implement more advanced sequence reader for song.py, allow for note sustains and pull-offs, make a distinction (reset dt on the oscillators)
