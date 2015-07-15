@@ -36,10 +36,9 @@ class Oscillator:
     def set_freq(self, freq):
         self.freq = freq
         self.samples_per_cycle = SAMPLE_RATE / freq
-        #self.dt = 0
         self.update_cycle = float(len(self.wavetable)) / float(self.samples_per_cycle)
 
-    def set_savetable(self, wavetable):
+    def set_wavetable(self, wavetable):
         self.wavetable = wavetable
         self.update_cycle = float(len(self.wavetable)) / float(self.samples_per_cycle)
 
@@ -166,7 +165,7 @@ class Sample:
                 new_data.append(b)
             self.data = new_data
 
-        #TODO: Convert sample rate to desired
+        # TODO: Convert sample rate to desired
 
     def generate_frame(self):
         if self.current_frame > len(self.data):

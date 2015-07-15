@@ -1,9 +1,15 @@
 rack:
-    type: "Mixer"
-    signals:
-        - name: "high"
-          type: "Sequencer"
-        - name: "mid"
-          type: "Sequencer"
-        - name: "bass"
-          type: "Sequencer"
+    type: "RangeCompressor"
+    gain: 0.35
+    signal:
+        type: "Mixer"
+        signals:
+            - name: "high"
+              type: "Sequencer"
+              waveform: "square"
+            - name: "mid"
+              type: "Sequencer"
+              waveform: "sine"
+            - name: "bass"
+              type: "Sequencer"
+              waveform: "square"

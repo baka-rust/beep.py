@@ -45,6 +45,14 @@ class Song:
                 e.add_signal(child_e.output)
         elif entity_type == "Sequencer":
             e = beep.Sequencer(bpm = entity_dict.get("bpm", self.bpm))
+            if "waveform" in entity_dict:
+                waveform = entity_dict.get("waveform")
+                if waveform == "sine":
+                    e.osc.set_wavetable_sin()
+                elif waveform == "saw":
+                    e.osc.set_wavetable_saw()
+                elif waveform == "square":
+                    e.osc.set_wavetable_square()
         elif entity_type == "RangeCompressor":
             e = beep.RangeCompressor(None, entity_dict.get("gain", 1.0))
             if "signal" in entity_dict:

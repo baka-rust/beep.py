@@ -33,19 +33,26 @@ It allows you to define your entity rack in a yaml file, and your sequences in a
 Pretty handy!
 
 ### Example rack.yaml
-This makes a mixer at the root, and creates three sequencers called "high", "mid", and "bass". Depending on the entity, you can have a "signals" field, or a singular "signal".
+This makes a compressor with a gain of .35 at the root with a mixer for input, which in turn mixes three sequencers called "high", "mid", and "bass". Depending on the entity, you can have a "signals" field, or a singular "signal".
 You can sorta nest a ton of these using beep.py elements. Pretty nifty
 
 ```yaml
 rack:
-    type: "Mixer"
-    signals:
-        - name: "high"
-          type: "Sequencer"
-        - name: "mid"
-          type: "Sequencer"
-        - name: "bass"
-          type: "Sequencer"
+    type: "RangeCompressor"
+    gain: 0.35
+    signal:
+        type: "Mixer"
+        signals:
+            - name: "high"
+              type: "Sequencer"
+              waveform: "square"
+            - name: "mid"
+              type: "Sequencer"
+              waveform: "sine"
+            - name: "bass"
+              type: "Sequencer"
+              waveform: "square"
+
 ```
 
 ### Example sequences.csv
@@ -54,18 +61,18 @@ Notes must be in this format: "{name}{s}{level}", where s is optional and stands
 
 ```csv
 high,mid,bass
-g4,e4,c3
-g4,e4,e3
-g4,e4,c3
-g4,e4,e3
+g4,e4,c2
+g4,e4,e2
+g4,e4,c2
+g4,e4,e2
 r,r,r
-b4,g4,e3
-b4,g4,e3
-g4,e4,c3
-g4,e4,c3
+b4,g4,e2
+b4,g4,e2
+g4,e4,c2
+g4,e4,c2
 r,r,r
-b4,g4,e3
-b4,g4,e3
-g4,e4,c3
-g4,e4,c3
+b4,g4,e2
+b4,g4,e2
+g4,e4,c2
+g4,e4,c2
 ```
