@@ -1,26 +1,26 @@
 # beep.py
 A lil' python lib for making 8bit music. Here's a list of all current available entities (aka simulated audio elements).
 
-## Signal
+### Signal
 A simple class that allows you to pass data (singular bytes usually, because of the 8-bit LPCM format that beep.py asssumes) between entities.
 
-## Oscillator
+### Oscillator
 A wave-table oscillator. Capable of generating its own tables like sine, saw, and square.
 
-## Mixer
+### Mixer
 Simple soft-clipping mixer that combines multiple signals. It simply takes a weighted sum of input elements.
 
-## Sequencer
+### Sequencer
 A Sequencer. Contains a singular oscillator and steps through defined note frequencies at a constant pace (a beat). When it's through with a sequence, it wraps around. It also can have rests, defined as `r` in the sequence (otherwise a list of floats).
 
-## Sample
+### Sample
 A sample, aka a chunk of audio data. Assumed to be a .wav file. It will automatically convert the sample to 8-bit mono on creation, but currently assumes a sample rate of 44100 (as defined in beep.py, thus it's potentially variable). Not really usable unitl I write a "Sampler" aka something in charge of sequencing and playing samples.
 Still, you can treat it like any other element with an output, and it'll just loop through the sample.
 
-## RangeCompressor
+### RangeCompressor
 A simple compressor that takes a gain (between 0 and 1) and applies it to a signal.
 
-## WaveInterface
+### WaveInterface
 The big dude who does all of the heavy lifting. It handles the output .wav file headers and creation.
 
 When adding a new element to your song, make sure to call `add_entity` on your WaveInterface. That way, frames will get generated correctly.
