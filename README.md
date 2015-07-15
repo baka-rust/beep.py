@@ -14,7 +14,7 @@ Simple soft-clipping mixer that combines multiple signals. It simply takes a wei
 A Sequencer. Contains a singular oscillator and steps through defined note frequencies at a constant pace (a beat). When it's through with a sequence, it wraps around. It also can have rests, defined as `r` in the sequence (otherwise a list of floats).
 
 ### Sample
-A sample, aka a chunk of audio data. Assumed to be a .wav file. It will automatically convert the sample to 8-bit mono on creation, but currently assumes a sample rate of 44100 (as defined in beep.py, thus it's potentially variable). Not really usable unitl I write a "Sampler" aka something in charge of sequencing and playing samples.
+A sample, aka a chunk of audio data. Assumed to be a .wav file. It will automatically convert the sample to 8-bit mono on creation, but currently assumes a sample rate of 44100 (as defined in beep.py, thus it's potentially variable). Not really usable until I write a "Sampler" aka something in charge of sequencing and playing samples.
 Still, you can treat it like any other element with an output, and it'll just loop through the sample.
 
 ### RangeCompressor
