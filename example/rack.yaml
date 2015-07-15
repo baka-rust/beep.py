@@ -1,0 +1,9 @@
+rack:
+    type: "Mixer"
+    signals:
+        - name: "high"
+          type: "Sequencer"
+        - name: "mid"
+          type: "Sequencer"
+        - name: "bass"
+          type: "Sequencer"

@@ -1,10 +1,13 @@
+# audio generation with 8bit wav
+# has synth stuff like Wave-table Oscillators, Mixers, Compressors, Sequencers, Samplers, etc
 
 import wave
 import math
 
 SAMPLE_RATE = 44100
-BPM = 80
 
+
+#TODO: envelopes, sampler (sample sequencer)
 
 class Signal:
 
@@ -33,7 +36,7 @@ class Oscillator:
     def set_freq(self, freq):
         self.freq = freq
         self.samples_per_cycle = SAMPLE_RATE / freq
-        self.dt = 0
+        #self.dt = 0
         self.update_cycle = float(len(self.wavetable)) / float(self.samples_per_cycle)
 
     def set_savetable(self, wavetable):
@@ -93,17 +96,31 @@ class Mixer:
 
 class Sequencer:
 
-    def __init__(self, sequence=['r']):
+    def __init__(self, bpm=80, sequence=['r']):
 
-        self.osc = Oscillator(sequence[0])
+        if sequence[0] == 'r':
+            self.osc = Oscillator(261.62)
+        else:
+            self.osc = Oscillator(sequence[0])
 
         self.output = Signal()
         self.sequence = sequence
         self.current_pos = 0
 
-        self.bps = (float(BPM) / 60.0)
-        self.update_frames = self.bps * SAMPLE_RATE
+        self.bps = (float(bpm) / 60.0)
+        self.update_frames = (1.0 / self.bps) * SAMPLE_RATE
         self.dt = 0
+
+    def set_sequence(self, sequence):
+
+        if sequence[0] == 'r':
+            self.osc.set_freq(261.62)
+        else:
+            self.osc.set_freq(sequence[0])
+
+        self.current_pos = 0
+        self.dt = 0
+        self.sequence = sequence
 
     def generate_frame(self):
         seq = self.sequence[self.current_pos % len(self.sequence)]
@@ -121,6 +138,59 @@ class Sequencer:
             self.output.send(chr(127)) # rest, generate silence
         else:
             self.output.send(self.osc.output.poll())
+
+
+class Sample:
+
+    def __init__(self, path):
+        w = wave.open(path, 'rb')
+        self.data = bytearray(w.readframes(w.getnframes()))
+        self.current_frame = 0
+
+        self.output = Signal()
+
+        if w.getsampwidth == 2:
+            print "compressing sample to 8bit."
+            new_data = bytearray()
+            for i in range(0, len(self.data), 2):
+                b = 256*ord(self.data[i-1]) + ord(self.data[i])
+                b = int(b * (255.0/65535.0))
+                new_data.append(b)
+            self.data = new_data
+
+        if w.getnchannels == 2:
+            print "compressing sample to mono."
+            new_data = bytearray()
+            for i in range(0, len(self.data), 2):
+                b = (int(self.data[i]) + int(self.data[i-1])) / 2
+                new_data.append(b)
+            self.data = new_data
+
+        #TODO: Convert sample rate to desired
+
+    def generate_frame(self):
+        if self.current_frame > len(self.data):
+            self.current_frame = 0
+        self.current_frame += 1
+        self.output.send(self.data[self.current_frame -1])
+
+
+class RangeCompressor:
+
+    def __init__(self, input, gain):
+        self.input = input
+        self.gain = gain # between 0.0 and 1.0, as its a compressor
+        self.output = Signal()
+
+    def set_gain(self, gain):
+        self.gain = gain
+
+    def generate_frame(self):
+        b = self.input.poll()
+        b = int((ord(b) - 127) * self.gain)
+        b += 127
+        self.output.send(chr(b))
+
 
 class WaveInterface:
 
@@ -145,8 +215,8 @@ class WaveInterface:
     def generate_seconds(self, seconds):
         self.generate_frames(SAMPLE_RATE * seconds)
 
-    def generate_beats(self, beats):
-        n = int((float(BPM) / 60.0) * SAMPLE_RATE) * beats
+    def generate_beats(self, beats, bpm=80):
+        n = int((1.0 / (float(bpm) / 60.0)) * SAMPLE_RATE) * beats
         self.generate_frames(n)
 
     def add_entity(self, entity):
@@ -156,18 +226,6 @@ class WaveInterface:
 if __name__ == "__main__":
 
     interface = WaveInterface("test.wav")
-
-    #osc_c = Oscillator(261.625565)
-    #interface.add_entity(osc_c)
-
-    #osc_e = Oscillator(329.63)
-    #interface.add_entity(osc_e)
-
-    #osc_g = Oscillator(392.00)
-    #interface.add_entity(osc_g)
-
-    #combi = Mixer(osc_c.output, osc_e.output, osc_g.output)
-    #interface.add_entity(combi)
 
     seq_a = Sequencer(sequence = [130.81, 164.81, 196.00])
     interface.add_entity(seq_a)
